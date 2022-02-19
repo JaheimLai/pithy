@@ -1,0 +1,27 @@
+{
+    "compileOnSave": true,
+    "compilerOptions": {
+        "rootDir": "./core",
+        "outDir": "./build",
+        "allowJs": true,
+        "target": "es6",
+        "module": "amd",
+        "alwaysStrict": true,
+        "strict": true,
+        "strictPropertyInitialization": false,
+        "strictNullChecks": false
+    },
+    "types": [
+        "node"
+    ],
+    "include": [
+        "./**/*.js",
+        "./**/*.ts",
+        "./*.css"
+    ],
+    "exclude": [
+        "./built/**/*",
+        "./declaration/**/*",
+        "*.d.ts"
+    ]
+}
