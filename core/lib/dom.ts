@@ -4,21 +4,20 @@ class Dom {
 
   private _element: HTMLElement;
 
-  constructor(tagName: string, option?: object) {
+  constructor(tagName: string, option?: any) {
     this._element = Dom.element(tagName, option);
   }
 
-  static element(tagName: string, option: object): HTMLElement {
+  static element(tagName: string, option?: any): HTMLElement {
     return document.createElement(tagName, option);
   }
 
-  static getBody(): HTMLBodyElement {
+  static getBody(): HTMLElement {
     return document.body;
   }
 
-  static isNewLine(text: string): boolean {
-    // 判断是否是新起一行
-    return (text == "\r\n" || text == "\r" || text == "\n");
+  element(tagName: string, option?: any): HTMLElement {
+    return document.createElement(tagName, option);
   }
 
   // 不做挂载处理
@@ -34,7 +33,7 @@ class Dom {
     old.remove();
   }
 
-  addEventListener(type: string, listener: (...arg: any[]) => void, option: any): void {
+  addEventListener(type: string, listener: (...arg: any[]) => void, option?: any): void {
     this._element.addEventListener(type, listener, option);
   }
 
@@ -61,12 +60,16 @@ class Dom {
     }
   }
 
-  setStyle(style) {
-    for (name of style) {
+  setStyle(style: any): void {
+    for (const name of style) {
       if (Object.prototype.hasOwnProperty.call(this._element.style, name)) {
         this._element.style[name] = style[name];
       }
     }
+  }
+
+  insert(dom: HTMLElement) {
+    this._element.append(dom);
   }
 
 }

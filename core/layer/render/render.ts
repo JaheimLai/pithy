@@ -1,7 +1,8 @@
-import Session from '../../handle/session/index';
 import TextLayer from '../view/text';
 import Dom from '../../lib/dom';
-import Fragment from './fragment';
+import FragmentInfo from '../fragment/info';
+import Session from '../../handle/session/index';
+import Token from '../../handle/parse/token';
 
 // 渲染到页面
 // 这里的流程并不保存分割的token，只需要在编译时用到
@@ -25,11 +26,25 @@ class Render {
     Dom.getBody().appendChild(this.container);
   }
 
-  renderText(fragments: Fragment) {
+  fragment(tokens: Token[]) {
+    // token列表，整理成dom描述
+    // 先写一个简单的实现
+    const list = tokens.map(t => new FragmentInfo(t));
+    this.renderText(list);
+  }
+
+  renderText(fragments: FragmentInfo[]) {
     // 渲染文本
     // 需要跟textlayer配合之类的
+    // for(let i = 0; i < fragments.length; i += 1) {
+    //   const fragment = fragments[i];
+    //   const dom = Dom.element(fragment.tag);
+    // }
+    // this.textlayer.insert();
   }
 
 }
 
-export default Render;
+export type RenderInstance = Render;
+
+export default new Render();

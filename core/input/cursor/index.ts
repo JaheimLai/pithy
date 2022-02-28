@@ -1,4 +1,3 @@
-import Session from '../../handle/session/index';
 import Parse from '../../handle/parse/index';
 import Mouse from '../../input/mouse/index';
 import Dom from '../../lib/dom';
@@ -71,8 +70,7 @@ class Cursor extends Dom {
     console.log('text  --', text);
   }
 
-  onMouse(e): void {
-    console.log('e --', e);
+  onMouse(): void {
     setTimeout(() => {
       this.focus();
     });
@@ -82,20 +80,11 @@ class Cursor extends Dom {
     this.getElement().focus();
   }
 
-  setLocation(x, y, start, end): void {
-    this.location.x = x;
-    this.location.y = y;
-    this.location.start = start;
-    this.location.end = end;
-    this.setPosition(y, null, null, x);
-    // this.cursor.$el.style.top = `${top}px`;
-    // this.cursor.$el.style.left = `${left}px`;
-  }
-
   onInput(e: InputEvent) {
-    const text = e.target.value;
+    const target = e.target as HTMLTextAreaElement;
+    const text = target.value;
     this.setText(text);
-    e.target.value = '';
+    target.value = '';
   }
 
   onCompositionstart(e: InputEvent) {
@@ -110,7 +99,7 @@ class Cursor extends Dom {
 
   addEventList(mouse: Mouse) {
     // 绑定鼠标类的事件
-    mouse.addEventListener(el.eventLeftType, this.onMouse.bind(this));
+    mouse.addEventListener(mouse.eventLeftType, this.onMouse.bind(this));
   }
 
 }

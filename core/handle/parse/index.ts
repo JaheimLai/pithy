@@ -1,5 +1,4 @@
-import Session from '../session/index';
-import Fragment from '../../layer/render/fragment';
+import Render from '../../layer/render/render';
 import parse from './parse';
 
 function insert(text: string): void {
@@ -8,6 +7,7 @@ function insert(text: string): void {
   const tokens = parse(text);
   // 然后在处理其他逻辑
   // 这里先写一个简单逻辑走一下流程
+  Render.fragment(tokens);
 }
 
 export default {

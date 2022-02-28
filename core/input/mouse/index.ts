@@ -32,11 +32,7 @@ class Mouse extends Event {
   }
 
   onMouseEvent(): void {
-
-  }
-
-  onMouseEvent(): void {
-
+    // ...
   }
 
   onMouseDown(e: MouseEvent): void {

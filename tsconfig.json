@@ -5,7 +5,7 @@
         "outDir": "./build",
         "allowJs": true,
         "target": "es6",
-        "module": "amd",
+        "module": "ES6",
         "alwaysStrict": true,
         "strict": true,
         "strictPropertyInitialization": false,
@@ -20,7 +20,8 @@
         "./*.css"
     ],
     "exclude": [
-        "./built/**/*",
+        "./build/**/*",
+        "./tests/**/*",
         "./declaration/**/*",
         "*.d.ts"
     ]

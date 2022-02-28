@@ -10,7 +10,7 @@ class Emitter extends Vendors {
     }
   }
 
-  addEventListener(type: string, fn: (...arg: any[]) => void, context: any) {
+  addEventListener(type: string, fn: (...arg: any[]) => void, context?: any) {
     let sub: Subscrie = this.getSubscribe(type);
     if (!sub) {
       sub = new Subscrie(type);
