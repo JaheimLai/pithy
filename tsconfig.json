@@ -5,7 +5,7 @@
         "outDir": "./build",
         "allowJs": true,
         "target": "es6",
-        "module": "ES6",
+        "module": "amd", // ES6 amd
         "alwaysStrict": true,
         "strict": true,
         "strictPropertyInitialization": false,

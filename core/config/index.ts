@@ -1,8 +1,7 @@
-const config = {
-  line: {
-    height: 21,
-    fontSize: 21,
-  },
+class config {
+
+  fontSize: number; // 字体大小
+
 };
 
 export default config;

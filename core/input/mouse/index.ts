@@ -1,33 +1,13 @@
 import Event from '../../handle/event/index';
-
-interface MouseDownType {
-  left: number;
-  right: number;
-  middle: number;
-}
+import { EVENT_TYPE, MOUSE_DOWN_TYPE } from './eventType';
 
 class Mouse extends Event {
 
   which: number; // 当前按下哪个鼠标键，对应mouseDownType值
   pressed: boolean; // 是否在按住鼠标键没有松开的状态
-  mouseDownType: MouseDownType;
-  readonly eventLeftType: string;
-  readonly eventRightType: string;
-  readonly eventMiddleType: string;
-  readonly eventClickType: string;
-  // click => PointerEvent 
 
   constructor() {
     super();
-    this.eventLeftType = 'left';
-    this.eventRightType = 'right';
-    this.eventMiddleType = 'middle';
-    this.eventClickType = 'click';
-    this.mouseDownType = {
-      left: 1,
-      right: 3,
-      middle: 2,
-    };
     this.pressed = false;
   }
 
@@ -39,16 +19,16 @@ class Mouse extends Event {
     this.pressed = true;
     this.which = e.which;
     switch(e.which) {
-      case this.mouseDownType.left:
-        this.dispatch(this.eventLeftType, e);
+      case MOUSE_DOWN_TYPE.LEFT:
+        this.dispatch(EVENT_TYPE.LEFT, e);
         break;
-      case this.mouseDownType.right:
-        this.dispatch(this.eventRightType, e);
-      case this.mouseDownType.middle:
-        this.dispatch(this.eventMiddleType, e);
+      case MOUSE_DOWN_TYPE.RIGHT:
+        this.dispatch(EVENT_TYPE.RIGHT, e);
+      case MOUSE_DOWN_TYPE.MIDDLE:
+        this.dispatch(EVENT_TYPE.MIDDLE, e);
         break;
       default:
-        this.dispatch(this.eventClickType, e);
+        this.dispatch(EVENT_TYPE.CLICK, e);
         break;
     }
   }

@@ -2,15 +2,19 @@ import Cursor from '../../input/cursor/index';
 import TextView from '../../layer/view/text';
 import Mouse from '../../input/mouse/index';
 import PieceTable from './pieceTable';
+import Config from '../../config/index';
 
 class Session {
 
-  lines: PieceTable;
+  pieceTable: PieceTable;
   Cursor?: Cursor;
   Mouse?: Mouse;
+  config: Config;
 
   constructor() {
-    this.lines = new PieceTable('');
+    this.pieceTable = new PieceTable('');
+    this.config = new Config();
+    this.config.fontSize = 22;
   }
 
 }

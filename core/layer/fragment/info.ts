@@ -1,6 +1,6 @@
-import Token from '../../handle/parse/token';
+import { Token } from '../../handle/parse/parse';
 
-class FragmentInfo {
+export class FragmentInfo {
 
   identifier: string; // 根据token转换成对应的标识 
   innerText: string; // 文本
@@ -10,10 +10,18 @@ class FragmentInfo {
   constructor(token: Token) {
     this.token = token;
     this.innerText = token.value;
-    this.identifier = 'string';
-    this.tag = 'span';
+    if (token.type === 'controlStr') {
+      this.tag = 'control';
+      this.identifier = 'control';
+    } else {
+      this.identifier = 'string';
+      this.tag = 'span';
+    }
   }
 
 }
 
-export default FragmentInfo;
+export const enum IDENTIFIER {
+  CONTROL = 'control',
+  STRING = 'string',
+};

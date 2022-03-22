@@ -1,0 +1,55 @@
+[
+  "第一行内容\n第二行内容",
+]
+
+Piece {
+  start: 0; // 在buffer的起始位置（偏移值）
+  length: 11; // 片段的长度
+  lineStarts: number[5], // 每个换行符的位置
+  bufferIndex: 0; // 在add buffer的那个位置（数组下标）
+}
+
+[
+  "第一行内容\n第二行内容",
+  "第二行位置插入一行\n",
+]
+
+Piece {
+  start: 0; // 在buffer的起始位置（偏移值）
+  length: 6; // 片段的长度
+  lineStarts: number[5], // 每个换行符的位置
+  bufferIndex: 0; // 在add buffer的那个位置（数组下标）
+}
+
+Piece {
+  start: 0; // 在buffer的起始位置（偏移值）
+  length: 10; // 片段的长度
+  lineStarts: number[9], // 每个换行符的位置
+  bufferIndex: 1; // 在add buffer的那个位置（数组下标）
+}
+
+Piece {
+  start: 6; // 在buffer的起始位置（偏移值）
+  length: 5; // 片段的长度
+  lineStarts: number[], // 每个换行符的位置
+  bufferIndex: 0; // 在add buffer的那个位置（数组下标）
+}
+
+[
+  "第一行内容\n第二行内容\n",
+  "第三行内容",
+]
+
+Piece {
+  start: 0; // 在buffer的起始位置（偏移值）
+  length: 11; // 片段的长度
+  lineStarts: number[5], // 每个换行符的位置
+  bufferIndex: 0; // 在add buffer的那个位置（数组下标）
+}
+
+Piece {
+  start: 0; // 在buffer的起始位置（偏移值）
+  length: 5; // 片段的长度
+  lineStarts: number[], // 每个换行符的位置
+  bufferIndex: 1; // 在add buffer的那个位置（数组下标）
+}

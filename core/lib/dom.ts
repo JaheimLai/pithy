@@ -16,8 +16,12 @@ class Dom {
     return document.body;
   }
 
+  public get el(): HTMLElement {
+    return this._element;
+  }
+
   element(tagName: string, option?: any): HTMLElement {
-    return document.createElement(tagName, option);
+    return Dom.element(tagName, option);
   }
 
   // 不做挂载处理
