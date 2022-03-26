@@ -17,9 +17,10 @@ export class CursorColumns {
    * 返回当前行的列术
    * @params lineContent 当前行的文本
    * @params column y轴值对应的位置 column = y / 字符宽度（最小）
+   * @params offset 偏移值，在当前column偏移
    */
-  public static visibleColumnFromColumn(lineContent: string, column: number): number {
-    const textLen = Math.min(column, lineContent.length);
+  public static visibleColumnFromColumn(lineContent: string, column: number, offset = 0): number {
+    const textLen = Math.min(column + offset, lineContent.length);
     const text = lineContent.substring(0, textLen);
     const iterator = new strings.GraphemeIterator(text);
 

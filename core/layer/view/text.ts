@@ -23,21 +23,33 @@ class TextLayer extends Dom {
     this.lineHeight = 22;
   }
 
+  getLineNumberAtOffset(lineNumber: number, offset = 0) {
+    let num = lineNumber + offset;
+    if (num > this.lines.length) {
+      return this.lines.length;
+    }
+    return num;
+  }
+
   /**
    * 根据top偏移值获取行号
    * @params offset -> element.offsetTop
    */
   getLineNumberAtVerticalOffset(offset: number): number {
-    const line: number = Math.floor(offset / this.lineHeight);
-    return line > this.lines.length ? this.lines.length : line;
+    const line: number = offset / this.lineHeight;
+    let minLine = Math.floor(line);
+    if (line - minLine > 0) {
+      minLine += 1;
+    }
+    return (minLine - 1) > this.lines.length ? this.lines.length : minLine;
   }
 
   // 获取偏移值高度
   getLineNumberAtLineNunber(lineNumber: number): number {
-    if (lineNumber > this.lines.length) {
-      return this.lines.length;
+    if (lineNumber - 1 > this.lines.length) {
+      return this.lines.length * this.lineHeight;
     }
-    return lineNumber * this.lineHeight;
+    return (lineNumber - 1) * this.lineHeight;
   }
 
   // 获取行高
@@ -67,7 +79,7 @@ class TextLayer extends Dom {
     const oldChildIdx: number = this.lines[lineNumber];
     const newChildIdx: number = super.el.children.length;
     // 计算行高
-    const top: number = (lineNumber + 1) * this.lineHeight;
+    const top: number = lineNumber * this.lineHeight;
     // 存下标
     this.lines[lineNumber] = newChildIdx;
     // 中间插入的时候，所有后面的行号都要改变

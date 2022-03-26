@@ -1,6 +1,7 @@
 import Cursor from '../../input/cursor/index';
 import TextView from '../../layer/view/text';
 import Mouse from '../../input/mouse/index';
+import Keyboard from '../../input/keyboard/index';
 import PieceTable from './pieceTable';
 import Config from '../../config/index';
 
@@ -9,6 +10,7 @@ class Session {
   pieceTable: PieceTable;
   Cursor?: Cursor;
   Mouse?: Mouse;
+  Keyboard?: Keyboard;
   config: Config;
 
   constructor() {

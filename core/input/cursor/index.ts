@@ -1,5 +1,6 @@
 import Parse from '../../handle/parse/index';
-import Mouse from '../../input/mouse/index';
+import Mouse from '../mouse/index';
+import Keyboard, { KeyCode } from '../keyboard/index';
 import Session from '../../handle/session/index';
 import Render from '../../layer/render/render';
 import Dom from '../../lib/dom';
@@ -66,6 +67,7 @@ class Cursor extends Dom {
     this.location.x = e.x;
     this.location.y = e.y;
     this.location.line = Math.max(Render.textlayer.getLineNumberAtVerticalOffset(e.y), 1);
+    console.log(' --- ', this.calcColumn(e.x));
     this.location.column = this.calcColumn(e.x);
     this.calcLocation();
     console.log(e.x, e.y);
@@ -77,15 +79,38 @@ class Cursor extends Dom {
   calcColumn(x: number): number {
     const cl = x / (this.charWidth);
     const clCeil = Math.ceil(cl);
-    if (clCeil - cl > 0.5) {
+    if (clCeil - cl < 0.5) {
       return clCeil;
     }
     return cl;
   }
 
   setPosition(line: number, column: number) {
+    console.log(' ----', line, column);
     this.location.line = line;
     this.location.column = column;
+  }
+
+  moveHorizontal(offset: number) {
+    // 光标水平移动
+    const lineText = Session.pieceTable.getLineRawContent(this.location.line - 1);
+    const column = CursorColumns.visibleColumnFromColumn(lineText, this.location.column, offset);
+    this.location.column += offset;
+    console.log('column --', column, offset, lineText);
+    super.el.style.left = `${column * (this.charWidth)}px`;
+  }
+
+  moveVertical(offset: number) {
+    // 光标垂直移动
+    debugger;
+    const lineText = Session.pieceTable.getLineRawContent(this.location.line - 1 + offset);
+    if (!lineText) {
+      return;
+    }
+    this.location.line += offset;
+    // 然后再水平移动
+    this.moveHorizontal(0);
+    super.el.style.top = `${Render.textlayer.getLineNumberAtLineNunber(this.location.line)}px`;
   }
 
   calcLocation() {
@@ -134,7 +159,14 @@ class Cursor extends Dom {
 
   addEventList(mouse: Mouse) {
     // 绑定鼠标类的事件
-    mouse.addEventListener(EVENT_TYPE.LEFT, this.onMouse.bind(this));
+    mouse.addEventListener(EVENT_TYPE.LEFT, this.onMouse, this);
+  }
+
+  addKeyBoard(keyboard: Keyboard) {
+    keyboard.addEventListener(keyboard.getKeyStr(KeyCode.LeftArrow), this.moveHorizontal.bind(this, -1));
+    keyboard.addEventListener(keyboard.getKeyStr(KeyCode.RightArrow), this.moveHorizontal.bind(this, 1));
+    keyboard.addEventListener(keyboard.getKeyStr(KeyCode.UpArrow), this.moveVertical.bind(this, -1));
+    keyboard.addEventListener(keyboard.getKeyStr(KeyCode.DownArrow), this.moveVertical.bind(this, 1));
   }
 
 }

@@ -29,15 +29,21 @@ function parse(text: string): Token[] {
   let value = '';
   for(let i = 0; i < text.length; i += 1) {
     if (isControStr(text[i])) {
+      if (value) {
+        const strToken = createToken('str', value);
+        tokens.push(strToken);
+        value = '';
+      }
       const controlStrToken = createToken('controlStr', text[i]);
       tokens.push(controlStrToken);
     } else {
       value += text[i];
-      if (i === (text.length - 1)) {
-        const strToken = createToken('str', value);
-        tokens.push(strToken);
-      }
     }
+  }
+  if (value) {
+    const strToken = createToken('str', value);
+    tokens.push(strToken);
+    value = '';
   }
   return tokens;
 }

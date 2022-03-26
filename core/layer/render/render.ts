@@ -49,21 +49,33 @@ class Render {
 
   renderText(fragments: FragmentInfo[]) {
     // 渲染文本
-    const doms: HTMLElement[][] = [[]];
+    const doms: HTMLElement[][] = [];
     let domsIdx = 0;
+    let addLineNumber = 0;
     for(let i = 0; i < fragments.length; i += 1) {
       const fragment = fragments[i];
       if (fragment.identifier === IDENTIFIER.CONTROL) {
         domsIdx = doms.push([]) - 1;
+        if (this.textlayer.isNewLine(fragment.innerText)) {
+          addLineNumber += 1;
+        }
         continue;
       }
       const dom = Dom.element(fragment.tag);
       dom.innerText = fragment.innerText;
+      if (!doms[domsIdx]) {
+        doms[domsIdx] = [];
+      }
       doms[domsIdx].push(dom);
     }
+    Session.Cursor.location.line += addLineNumber;
     const line = this.textlayer.insertLines(Session.Cursor.location.line, doms);
-    // 插入了文本，就要重新计算光标位置
-    Session.Cursor.setPosition(line, Session.pieceTable.getLineLength(line));
+    if (addLineNumber) {
+      Session.Cursor.setPosition(line, 0);
+    } else {
+      // 插入了文本，就要重新计算光标位置
+      Session.Cursor.setPosition(line, Session.pieceTable.getLineLength(line));
+    }
     Session.Cursor.calcLocation();
   }
 
