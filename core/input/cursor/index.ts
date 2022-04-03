@@ -5,7 +5,7 @@ import Session from '../../handle/session/index';
 import Render from '../../layer/render/render';
 import Dom from '../../lib/dom';
 import { EVENT_TYPE } from '../../input/mouse/eventType';
-import { CursorColumns } from './column';
+import { CursorColumns } from '../../handle/column';
 
 interface Location { // 表示光标所在位置
   x: number;
@@ -77,12 +77,7 @@ class Cursor extends Dom {
   }
 
   calcColumn(x: number): number {
-    const cl = x / (this.charWidth);
-    const clCeil = Math.ceil(cl);
-    if (clCeil - cl < 0.5) {
-      return clCeil;
-    }
-    return cl;
+    return Math.round(x / this.charWidth);
   }
 
   setPosition(line: number, column: number) {
@@ -93,33 +88,64 @@ class Cursor extends Dom {
 
   moveHorizontal(offset: number) {
     // 光标水平移动
-    const lineText = Session.pieceTable.getLineRawContent(this.location.line - 1);
-    const column = CursorColumns.visibleColumnFromColumn(lineText, this.location.column, offset);
-    this.location.column += offset;
+    const lineText = Session.pieceTable.getLineRawContent(this.location.line);
+    const maxColum = CursorColumns.getMaxColumn(lineText);
+    let nextColumn = this.location.column + offset;
+    if (nextColumn > maxColum) {
+      // 移动到该字符后
+      nextColumn = maxColum + 1;
+    }
+    if (nextColumn < 0) {
+      // 移动到该字符前
+      nextColumn = 1;
+    }
+    let column = CursorColumns.visibleColumnFromColumn(lineText, nextColumn);
+    this.location.column = nextColumn;
     console.log('column --', column, offset, lineText);
-    super.el.style.left = `${column * (this.charWidth)}px`;
+    super.el.style.left = `${column * this.charWidth}px`;
+  }
+
+  // 光标移动到新位置
+  move() {
+    // 该方法默认location的位置是合法的
+    const lineText = Session.pieceTable.getLineRawContent(this.location.line);
+    const top = Render.textlayer.getLineNumberAtLineNunber(this.location.line);
+    let column = CursorColumns.visibleColumnFromColumn(lineText, this.location.column);
+    super.el.style.top = `${top}px`;
+    super.el.style.left = `${column * this.charWidth}px`;
   }
 
   moveVertical(offset: number) {
     // 光标垂直移动
-    debugger;
-    const lineText = Session.pieceTable.getLineRawContent(this.location.line - 1 + offset);
-    if (!lineText) {
+    const line = Render.textlayer.getLineNumberAtOffset(this.location.line + offset);
+    if (line === this.location.line) {
       return;
     }
-    this.location.line += offset;
+    this.location.line = line;
     // 然后再水平移动
     this.moveHorizontal(0);
-    super.el.style.top = `${Render.textlayer.getLineNumberAtLineNunber(this.location.line)}px`;
+    const top = Render.textlayer.getLineNumberAtLineNunber(this.location.line);
+    super.el.style.top = `${top}px`;
   }
 
+  // 计算鼠标基于x的光标位置
   calcLocation() {
     // 计算光标高度、宽度
-    let top = Render.textlayer.getLineNumberAtLineNunber(this.location.line);
-    let left = CursorColumns.visibleColumnFromColumn(Session.pieceTable.getLineRawContent(this.location.line), this.location.column);
-    console.log(left, this.charWidth);
+    const top = Render.textlayer.getLineNumberAtLineNunber(this.location.line);
+    const textContent = Session.pieceTable.getLineRawContent(this.location.line);
+    const maxColum = CursorColumns.getMaxColumn(textContent);
+    let vColumn = 0, column = 0;
+    if (this.location.column > maxColum) {
+      this.location.column = maxColum;
+    }
+    if (textContent.length) {
+      vColumn = CursorColumns.columnFromVisibleColumn(textContent, this.location.column);
+      column = CursorColumns.visibleColumnFromColumn(textContent, vColumn);
+    }
+    this.location.column = vColumn;
+    console.log(column, vColumn, this.charWidth);
     super.el.style.top = `${top}px`;
-    super.el.style.left = `${left * (this.charWidth)}px`;
+    super.el.style.left = `${column * this.charWidth}px`;
   }
 
   getLocation(): Location {
@@ -153,8 +179,10 @@ class Cursor extends Dom {
 
   onCompositionend(e: InputEvent) {
     console.log('e. data', e.data);
-    this.setText(e.data);
     this.isComp = false;
+    const target = e.target as HTMLTextAreaElement;
+    this.setText(e.data);
+    target.value = '';
   }
 
   addEventList(mouse: Mouse) {

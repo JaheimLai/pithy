@@ -1,4 +1,7 @@
 import Dom from '../../lib/dom';
+import { FragmentInfo } from '../fragment/info';
+import { TOKEN } from '../../handle/parse/parse';
+import { Tag, TagName } from '../render/tag';
 
 // 文本容器，用来做一些行操作，行渲染
 class TextLayer extends Dom {
@@ -28,6 +31,9 @@ class TextLayer extends Dom {
     if (num > this.lines.length) {
       return this.lines.length;
     }
+    if (num < 0) {
+      return 0;
+    }
     return num;
   }
 
@@ -36,12 +42,8 @@ class TextLayer extends Dom {
    * @params offset -> element.offsetTop
    */
   getLineNumberAtVerticalOffset(offset: number): number {
-    const line: number = offset / this.lineHeight;
-    let minLine = Math.floor(line);
-    if (line - minLine > 0) {
-      minLine += 1;
-    }
-    return (minLine - 1) > this.lines.length ? this.lines.length : minLine;
+    const line: number = Math.round(offset / this.lineHeight);
+    return line > this.lines.length ? this.lines.length : line;
   }
 
   // 获取偏移值高度
@@ -50,6 +52,18 @@ class TextLayer extends Dom {
       return this.lines.length * this.lineHeight;
     }
     return (lineNumber - 1) * this.lineHeight;
+  }
+
+  getLineWidth(lineNumber: number): number {
+    if (!this.lines.length) {
+      return 0;
+    }
+    const idx = lineNumber ? this.lines[lineNumber - 1] : 0;
+    const drl: DOMRectList = super.el.children[idx].getClientRects();
+    if (drl.length) {
+      return drl[0].width;
+    }
+    return 0;
   }
 
   // 获取行高
@@ -68,7 +82,7 @@ class TextLayer extends Dom {
    * 创建新的一行
    * @params line 在哪一行后插入
    */
-  createdLine(content: HTMLElement[] | HTMLElement, lineNumber: number): void {
+  createdLine(lineNumber: number, content?: HTMLElement[] | HTMLElement): HTMLElement {
     // 新起一行
     // 每行之间用绝对定位来固定（避免频繁插入、更改dom）
     const newLineDom: HTMLElement = super.element('div');
@@ -92,12 +106,15 @@ class TextLayer extends Dom {
     newLineDom.style.top = `${top}px`;
     newLineDom.style.position = 'absolute';
     newLineDom.style.height = `${this.lineHeight}px`;
-    if (Array.isArray(content)) {
-      content.forEach(i => { newLineDom.append(i); });
-    } else {
-      newLineDom.append(content);
+    if (content) {
+      if (Array.isArray(content)) {
+        content.forEach(i => { newLineDom.append(i); });
+      } else {
+        newLineDom.append(content);
+      }
     }
     this.insert(newLineDom);
+    return newLineDom;
   }
 
   getLine(line: number): HTMLElement {
@@ -139,19 +156,43 @@ class TextLayer extends Dom {
    * @params content [HTMLElement[], HTMLElement[]] 的二维数组
    * @return 在哪一行插入结束
    */
-  insertLines(startLineNumber: number, content: HTMLElement[][]): number {
+  insertLines(startLineNumber: number, fragments: FragmentInfo[]): number {
     let line: number = startLineNumber - 1;
+    let currentLineDom: HTMLElement;
+    let currentLine: number;
     console.log('line --', line);
-    for (let i = 0; i < content.length; i += 1) {
-      const doms = content[i];
-      if (!this.lines.length || line >= this.lines.length) {
-        this.createdLine(doms, line);
-      } else {
-        this.replace(doms, line)
+    for(let i = 0; i < fragments.length; i += 1) {
+      currentLineDom = this.getLine(line);
+      const fragment = fragments[i];
+      if (!currentLineDom) {
+        // 如果当前行为空
+        currentLineDom = this.createdLine(line);
+        if (line > 0) {
+          line += 1;
+        }
       }
-      line += 1;
+      if (
+        fragment.token.type === TOKEN.controlStr
+        &&
+        fragment.tag === TagName.LineFeed
+      ) {
+        // 如果是控制字符，判断是否是换行
+        line += 1;
+        currentLineDom = this.createdLine(line);
+      } else {
+        if (currentLine !== line) {
+          currentLineDom.innerHTML = '';
+          currentLine = line;
+        }
+        const tag = Tag.getTagName(fragment);
+        if (tag) {
+          currentLineDom.insertAdjacentHTML('beforeend', tag);
+        } else {
+          currentLineDom.insertAdjacentText('beforeend', fragment.innerText);
+        }
+      }
     }
-    return line;
+    return line + 1;
   }
 
 }

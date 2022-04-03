@@ -131,10 +131,10 @@ class PieceTable {
     return this.getLineRawContent(lineNumber).length;
   }
 
-  nodeAt(lineNumber: number) {
+  nodeAt(lineNumber: number): AvlTree<Piece> {
     if (
       this.catch
-      && this.catch.lineNumber === lineNumber
+      && this.catch.lineNumber === lineNumber - 1
     ) {
       return this.catch.piece;
     }
@@ -153,14 +153,36 @@ class PieceTable {
     return null;
   }
 
+  getPieceText(x: AvlTree<Piece>, lineNumber: number): string {
+    // 目前来说，没有其他偏移值，会出现lineStarts为空而又没其他偏移值定位的问题，后面会修复
+    // 所以才有x.piece.lineStarts.length的判断
+    // 获取片段里面对应行号的字符
+    const buffer = this.buffers[x.piece.bufferIndex];
+    let str: string;
+    if (x.piece.lineStarts.length) {
+      // 若行号不为空，则每一行的位置 index = lineNumber - 2(数组从0开始需要-1，行数从第二行开始算也要-1)
+      const currentIndex = lineNumber - 2;
+      const start = x.piece.lineStarts[currentIndex];
+      // 若是最后一行
+      if (!x.piece.lineStarts[currentIndex + 1]) {
+        str = buffer.substring(start + 1);
+      } else {
+        str = buffer.substring(start + 1, x.piece.lineStarts[currentIndex + 1]);
+      }
+    } else {
+      str = buffer;
+    }
+    return str;
+  }
+
   // 查找某一行的字符
   getLineRawContent(lineNumber: number): string {
     if (
       this.catch
-      && this.catch.lineNumber === lineNumber
+      && this.catch.lineNumber === lineNumber - 1
       && this.catch.text
     ) {
-      return this.catch.text;
+      return this.getPieceText(this.catch.piece, lineNumber);
     }
     const root = this.pieces;
     let x = this.pieces;
@@ -170,42 +192,27 @@ class PieceTable {
         x = x.left;
       } else if (x.lf_left + x.piece.lfCur > lineNumber - 1) {
         // 在当前节点里面
-        const lineStartsIdx = lineNumber - x.lf_left;
+        const lineStartsIdx = (lineNumber - 1) - x.lf_left;
         let buffer: string, str: string;
         // 目前来说，没有其他偏移值，会出现lineStarts为空而又没其他偏移值定位的问题，后面会修复
         // 所以才有x.piece.lineStarts.length的判断
         buffer = this.buffers[x.piece.bufferIndex];
         if (x.piece.lineStarts.length) {
-          const start = x.piece.lineStarts[Math.min(lineStartsIdx - 1, 0)] + 1;
+          const start = lineStartsIdx - 1 >= 0 ? x.piece.lineStarts[lineStartsIdx - 1] + 1 : 0;
           const end = x.piece.lineStarts[lineStartsIdx];
           str = buffer.substring(start, end);
         } else {
           str = buffer
         }
-        this.catch = new CatchPiece(x, lineNumber, str);
+        this.catch = new CatchPiece(x, lineNumber - 1, str);
         return str;
       } else if (x.lf_left + x.piece.lfCur === lineNumber - 1) {
         // 也是在当前节点里面
         // 目前来说，没有其他偏移值，会出现lineStarts为空而又没其他偏移值定位的问题，后面会修复
         // 所以才有x.piece.lineStarts.length的判断
-        const buffer = this.buffers[x.piece.bufferIndex];
-        let str: string;
-        if (x.piece.lineStarts.length) {
-          // 若行号不为空，则每一行的位置 index = lineNumber - 2(数组从0开始需要-1，行数从第二行开始算也要-1)
-          const currentIndex = lineNumber - 2;
-          const start = x.piece.lineStarts[currentIndex];
-          // 若是最后一行
-          if (!x.piece.lineStarts[currentIndex + 1]) {
-            str = buffer.substring(start + 1);
-          } else {
-            str = buffer.substring(start + 1, start + x.piece.lineStarts[currentIndex + 1]);
-          }
-        } else {
-          str = buffer;
-        }
-        this.catch = new CatchPiece(x, lineNumber, str);
+        let str: string = this.getPieceText(x, lineNumber);
+        this.catch = new CatchPiece(x, lineNumber - 1, str);
         return str;
-        // break;
       } else {
         // 查找右子树
         lineNumber -= x.lf_left + x.piece.lfCur;

@@ -5,6 +5,8 @@ export const enum KeyCode {
   UpArrow = 0x26,
   RightArrow = 0x27,
   DownArrow = 0x28,
+  Tab = 0x09, // tab
+  Space = 0x20,
 }
 
 // 监听键盘事件

@@ -1,27 +1,38 @@
-import { Token } from '../../handle/parse/parse';
+import { Token, TOKEN } from '../../handle/parse/parse';
+import { CharCode } from '../../handle/charCode';
+import { TagName } from '../render/tag';
 
 export class FragmentInfo {
 
-  identifier: string; // 根据token转换成对应的标识 
   innerText: string; // 文本
-  tag: string;
+  tag: TagName;
   token: Token;
 
   constructor(token: Token) {
     this.token = token;
-    this.innerText = token.value;
-    if (token.type === 'controlStr') {
-      this.tag = 'control';
-      this.identifier = 'control';
+    if (token.type === TOKEN.controlStr) {
+      this.transformControlStrAtDom(token);
     } else {
-      this.identifier = 'string';
-      this.tag = 'span';
+      this.innerText = token.value;
+      this.tag = TagName.String;
+    }
+  }
+
+  transformControlStrAtDom(token: Token): void {
+    switch (token.value.charCodeAt(0)) {
+      case CharCode.Tab:
+        this.tag = TagName.Tab;
+        this.innerText = String.fromCharCode(CharCode.Tab);
+        break;
+      case CharCode.Space:
+        this.tag = TagName.Space;
+        this.innerText = String.fromCharCode(CharCode.Space);
+        break;
+      case CharCode.LineFeed:
+        this.tag = TagName.LineFeed;
+        this.innerText = '';
+        break;
     }
   }
 
 }
-
-export const enum IDENTIFIER {
-  CONTROL = 'control',
-  STRING = 'string',
-};

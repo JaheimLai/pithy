@@ -1,6 +1,6 @@
 import TextLayer from '../view/text';
 import Dom from '../../lib/dom';
-import { FragmentInfo, IDENTIFIER } from '../fragment/info';
+import { FragmentInfo } from '../fragment/info';
 import Session from '../../handle/session/index';
 import { Token } from '../../handle/parse/parse';
 import cssRender from './cssRender';
@@ -32,6 +32,7 @@ class Render {
     this.content.style.fontSize = `${Session.config.fontSize}px`;
     this.textlayer = new TextLayer(this.content);
     this.textlayer.el.style.fontSize = `${Session.config.fontSize}px`;
+    this.textlayer.el.style.whiteSpace = 'pre';
     // body -> container -> scroller -> content
     this.scroller.appendChild(this.content);
     this.container.appendChild(this.scroller);
@@ -49,34 +50,15 @@ class Render {
 
   renderText(fragments: FragmentInfo[]) {
     // 渲染文本
-    const doms: HTMLElement[][] = [];
-    let domsIdx = 0;
-    let addLineNumber = 0;
-    for(let i = 0; i < fragments.length; i += 1) {
-      const fragment = fragments[i];
-      if (fragment.identifier === IDENTIFIER.CONTROL) {
-        domsIdx = doms.push([]) - 1;
-        if (this.textlayer.isNewLine(fragment.innerText)) {
-          addLineNumber += 1;
-        }
-        continue;
-      }
-      const dom = Dom.element(fragment.tag);
-      dom.innerText = fragment.innerText;
-      if (!doms[domsIdx]) {
-        doms[domsIdx] = [];
-      }
-      doms[domsIdx].push(dom);
-    }
-    Session.Cursor.location.line += addLineNumber;
-    const line = this.textlayer.insertLines(Session.Cursor.location.line, doms);
-    if (addLineNumber) {
+    const line = this.textlayer.insertLines(Session.Cursor.location.line, fragments);
+    if (Session.Cursor.location.line !== line) {
       Session.Cursor.setPosition(line, 0);
     } else {
       // 插入了文本，就要重新计算光标位置
-      Session.Cursor.setPosition(line, Session.pieceTable.getLineLength(line));
+      // 移到当前插入的文本后
+      Session.Cursor.setPosition(line, Session.pieceTable.getLineLength(line) + 1);
     }
-    Session.Cursor.calcLocation();
+    Session.Cursor.move();
   }
 
 }
