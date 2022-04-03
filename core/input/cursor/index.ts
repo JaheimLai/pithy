@@ -67,10 +67,25 @@ class Cursor extends Dom {
     this.location.x = e.x;
     this.location.y = e.y;
     this.location.line = Math.max(Render.textlayer.getLineNumberAtVerticalOffset(e.y), 1);
-    console.log(' --- ', this.calcColumn(e.x));
-    this.location.column = this.calcColumn(e.x);
-    this.calcLocation();
-    console.log(e.x, e.y);
+    // 计算对应行的位置
+    const top = Render.textlayer.getLineNumberAtLineNunber(this.location.line);
+    // 相对x的位置
+    // 并进行计算，如果x大于最大列，则为最大列
+    // 如果当前行为空行，则为0
+    let columnX = this.calcColumn(e.x);
+    const textContent = Session.pieceTable.getLineRawContent(this.location.line);
+    const maxColum = CursorColumns.getMaxColumn(textContent);
+    let vColumn = 0, column = 0;
+    if (columnX > maxColum) {
+      columnX = maxColum;
+    }
+    if (textContent.length) {
+      vColumn = CursorColumns.columnFromVisibleColumn(textContent, columnX);
+      column = CursorColumns.visibleColumnFromColumn(textContent, vColumn);
+    }
+    this.location.column = vColumn;;
+    super.el.style.top = `${top}px`;
+    super.el.style.left = `${column * this.charWidth}px`;
     setTimeout(() => {
       this.focus();
     });
@@ -126,26 +141,6 @@ class Cursor extends Dom {
     this.moveHorizontal(0);
     const top = Render.textlayer.getLineNumberAtLineNunber(this.location.line);
     super.el.style.top = `${top}px`;
-  }
-
-  // 计算鼠标基于x的光标位置
-  calcLocation() {
-    // 计算光标高度、宽度
-    const top = Render.textlayer.getLineNumberAtLineNunber(this.location.line);
-    const textContent = Session.pieceTable.getLineRawContent(this.location.line);
-    const maxColum = CursorColumns.getMaxColumn(textContent);
-    let vColumn = 0, column = 0;
-    if (this.location.column > maxColum) {
-      this.location.column = maxColum;
-    }
-    if (textContent.length) {
-      vColumn = CursorColumns.columnFromVisibleColumn(textContent, this.location.column);
-      column = CursorColumns.visibleColumnFromColumn(textContent, vColumn);
-    }
-    this.location.column = vColumn;
-    console.log(column, vColumn, this.charWidth);
-    super.el.style.top = `${top}px`;
-    super.el.style.left = `${column * this.charWidth}px`;
   }
 
   getLocation(): Location {
