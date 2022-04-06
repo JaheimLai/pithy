@@ -1,10 +1,5 @@
 import AvlTreeApi, { AvlTree } from './avlTree/tree';
 
-const enum SOURCE {
-  ADD = 'add',
-  ORG = 'original',
-}
-
 class Piece {
   start: number; // 在buffer的起始位置（偏移值）
   length: number; // 片段的长度
