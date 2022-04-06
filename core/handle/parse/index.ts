@@ -15,7 +15,7 @@ function insert(text: string): void {
     text = text.substr(-1,1);
     lineText = '';
   }
-  Session.pieceTable.insert(line, text);    
+  Session.pieceTable.insert(line, column, text);    
   const tokens = parse(lineText + text);
   // 然后在处理其他逻辑
   // 这里先写一个简单逻辑走一下流程

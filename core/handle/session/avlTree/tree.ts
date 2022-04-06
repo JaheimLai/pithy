@@ -179,6 +179,20 @@ function insert<T extends Piece>(element: T, avlTree?: AvlTree<T>): AvlTree<T> {
         avlTree = doubleRotateWithRight(avlTree);
       }
     }
+  } else {
+    // 相等的情况下，默认往右边插入
+    avlTree.right = insert(element, avlTree.right);
+    // 不满足平衡
+    if (getHeight(avlTree.right) - getHeight(avlTree.left) === 2) {
+      // 不满足的条件只能是右子树高度高于左边
+      // 且有右右和右左两种情况
+      if (contrastByLeft(element, avlTree.right) > 0) {
+        // contrastByLeft(element, avlTree.right) > 0   ===   element > avlTree.right
+        avlTree = singleRotateWithRight(avlTree);
+      } else {
+        avlTree = doubleRotateWithRight(avlTree);
+      }
+    }
   }
   avlTree.height = Math.max(getHeight(avlTree.left), getHeight(avlTree.right)) + 1;
   return avlTree;

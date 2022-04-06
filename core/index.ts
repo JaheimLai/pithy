@@ -25,4 +25,4 @@ class Editor {
   }
 }
 
-const edirot = new Editor();
+export default new Editor();
