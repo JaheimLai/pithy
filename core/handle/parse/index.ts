@@ -10,13 +10,14 @@ function insert(text: string): void {
   const { line, column } = Session.Cursor.location;
   let lineText = Session.pieceTable.getLineRawContent(line);
   // console.log('getLineWidth --', CursorColumns.getMaxColumn(lineText), column);
-  // 判断是否插入了换行符
-  if (Render.textlayer.isNewLine(text.substr(-1,1))) {
-    text = text.substr(-1,1);
-    lineText = '';
-  }
+  // // 判断是否插入了换行符
   Session.pieceTable.insert(line, column, text);    
-  const tokens = parse(lineText + text);
+  if (Render.textlayer.isNewLine(text.substr(-1,1))) {
+    lineText = text.substr(-1,1) + Session.pieceTable.getLineRawContent(line + 1);
+  } else {
+    lineText = Session.pieceTable.getLineRawContent(line);
+  }
+  const tokens = parse(lineText);
   // 然后在处理其他逻辑
   // 这里先写一个简单逻辑走一下流程
   Render.fragment(tokens);

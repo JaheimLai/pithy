@@ -52,11 +52,11 @@ class Render {
     // 渲染文本
     const line = this.textlayer.insertLines(Session.Cursor.location.line, fragments);
     if (Session.Cursor.location.line !== line) {
-      Session.Cursor.setPosition(line, 0);
+      Session.Cursor.setPosition(line, 1);
     } else {
       // 插入了文本，就要重新计算光标位置
       // 移到当前插入的文本后
-      Session.Cursor.setPosition(line, Session.pieceTable.getLineLength(line) + 1);
+      Session.Cursor.moveEnd();
     }
     Session.Cursor.move();
   }

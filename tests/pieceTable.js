@@ -45,7 +45,7 @@ import PieceTable from '../build/handle/session/pieceTable.js';
 //   });
 // });
 
-describe('测试插入行', function () {
+describe('测试连续插入行', function () {
   const table = new PieceTable();
   it('插入第一段', function () {
     table.insert(1, 1,'const sl = 132;');
@@ -71,6 +71,47 @@ describe('测试插入行', function () {
   });
 });
 
+describe('测试连续插入', function () {
+  const table = new PieceTable();
+  it('插入换行', function () {
+    table.insert(1, 16,"1234 abcd \n");
+    expect(table.getLineRawContent(1)).to.equal('1234 abcd ');
+  });
+  it('获取第二行', function () {
+    expect(table.getLineRawContent(2)).to.equal('');
+  });
+  it('插入第二行', function () {
+    table.insert(2, 1, '13');
+    expect(table.getLineRawContent(2)).to.equal('13');
+  });
+  it('第二行尾部插入', function () {
+    table.insert(2, 3, "56");
+    expect(table.getLineRawContent(2)).to.equal('1356');
+  });
+  it('第二行中间插入', function () {
+    table.insert(2, 2, "g");
+    expect(table.getLineRawContent(2)).to.equal('1g356');
+    table.insert(2, 4, "f");
+    expect(table.getLineRawContent(2)).to.equal('1g3f56');
+  });
+  it('第二行尾部插入', function () {
+    table.insert(2, 7, "910");
+    expect(table.getLineRawContent(2)).to.equal('1g3f56910');
+  });
+  it('插入第三行', function () {
+    table.insert(2, 10, "\nabc");
+    expect(table.getLineRawContent(3)).to.equal('abc');
+  });
+  it('第三行中间插入', function () {
+    table.insert(3, 3, "1");
+    expect(table.getLineRawContent(3)).to.equal('ab1c');
+  });
+  it('第三行尾部插入', function () {
+    table.insert(3, 5, "k");
+    expect(table.getLineRawContent(3)).to.equal('ab1ck');
+  });
+});
+
 describe('测试getLineLength方法', () => {
   const table = new PieceTable();
   table.insert(1, 1, 'const sl = 132;');
@@ -90,7 +131,7 @@ describe('测试getLineLength方法', () => {
 });
 
 
-describe('测试中间插入行', function () {
+describe('测试连续中间插入行', function () {
   // 暂不支持换行
   const table = new PieceTable();
   it('第一段', function () {
@@ -169,7 +210,6 @@ describe('测试getLineRawContent，换行符在行头', function () {
   const table = new PieceTable();
   table.insert(1, 1, "const sl = 132;");
   table.insert(4, 1, "\nslddl=123;");
-  console.log(table.pieces.right)
   it('1', function () {
     expect(table.getLineRawContent(1)).to.equal('const sl = 132;');
   });

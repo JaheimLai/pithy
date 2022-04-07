@@ -24,8 +24,8 @@ const enum EventType {
 
 class Cursor extends Dom {
 
-  isComp: boolean;
-  location: Location;
+  public location: Location;
+  private isComp: boolean;
   private timeStamp: number;
   private timeInterval: number;
   private charWidth: number; // 字符宽度
@@ -58,6 +58,12 @@ class Cursor extends Dom {
   }
 
   setText(text: string): void {
+    this.location.start = this.location.column;
+    if (this.location.start > 0) {
+      this.location.end = text.length;
+    } else {
+      this.location.end = text.length + 1;
+    }
     Parse.insert(text);
     console.log('text  --', text);
   }
@@ -118,6 +124,10 @@ class Cursor extends Dom {
     this.location.column = nextColumn;
     console.log('column --', column, offset, lineText);
     super.el.style.left = `${column * this.charWidth}px`;
+  }
+
+  moveEnd() {
+    this.moveHorizontal(this.location.end);
   }
 
   // 光标移动到新位置

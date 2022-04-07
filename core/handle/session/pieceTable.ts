@@ -200,7 +200,7 @@ class PieceTable {
         const start = lineStartsIdx - 1 >= 0 ? node.piece.lineStarts[lineStartsIdx - 1] + 1 : 0;
         const end = node.piece.lineStarts[lineStartsIdx];
         startText = buffer.substring(start, start - column);
-        endText = buffer.substring(start, start - column);
+        endText = buffer.substring(start - column, end);
       } else if (
         node.lf_left + node.piece.lfCur === offsetLineNunber - 1
         && node.piece.lineStarts.length
@@ -211,11 +211,11 @@ class PieceTable {
         const start = node.piece.lineStarts[currentIndex];
         // 若是最后一行
         if (!node.piece.lineStarts[currentIndex + 1]) {
-          startText = buffer.substring(0, start + 1);
-          endText = buffer.substring(start + 2);
+          startText = buffer.substring(0, start + column);
+          endText = buffer.substring(start + column);
         } else {
-          startText = buffer.substring(0, start + 1);
-          endText = buffer.substring(start + 2, node.piece.lineStarts[currentIndex + 1]);
+          startText = buffer.substring(0, start + column);
+          endText = buffer.substring(start + column, node.piece.lineStarts[currentIndex + 1]);
         }
       } else {
         startText = buffer.substring(0, column - 1);
@@ -354,7 +354,7 @@ class PieceTable {
       this.catch
       && this.catch.lineNumber === sourceLineNumber - 1
     ) {
-      return this.getPieceText(this.catch.piece, this.catch.offsetLineNunber);
+      return this.getPieceText(this.catch.piece, sourceLineNumber);
     }
     const root = this.pieces;
     let lineNumber: number = sourceLineNumber;
