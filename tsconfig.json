@@ -23,6 +23,7 @@
         "./build/**/*",
         "./tests/**/*",
         "./declaration/**/*",
-        "*.d.ts"
+        "*.d.ts",
+        "require.js"
     ]
 }
