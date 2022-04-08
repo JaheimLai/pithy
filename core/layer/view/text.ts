@@ -8,6 +8,8 @@ class TextLayer extends Dom {
 
   private lineHeight: number; // 行高 px
   private lines: number[]; // 保存每一行对于children下标的映射
+  private lastHighlightLine: number; // 最后一次高亮的行下标
+  public markerWidth: number; // 行号的宽度，暂时写死
 
   constructor(container: HTMLElement) {
     super('div');
@@ -24,6 +26,7 @@ class TextLayer extends Dom {
     super.mount(container);
     this.lines = [];
     this.lineHeight = 22;
+    this.markerWidth = 50;
   }
 
   getLineNumberAtOffset(lineNumber: number, offset = 0) {
@@ -78,6 +81,42 @@ class TextLayer extends Dom {
     return super.el.children.length;
   }
 
+  currentLineHighlight(lineNumber: number): void {
+    // rgba(0, 0, 0, 0.07)
+    if (lineNumber > this.lines.length) {
+      return;
+    }
+    for (let i = 0; i < this.lines.length; i += 1) {
+      if (i + 1 === lineNumber) {
+        const dom = super.el.children[i] as HTMLElement;
+        dom.style.backgroundColor = 'rgba(0, 0, 0, 0.07)';
+        break;
+      }
+    }
+    if (this.lastHighlightLine >= 0 && this.lastHighlightLine !== lineNumber) {
+      const idx = this.lastHighlightLine - 1;
+      if (this.lines[idx] >= 0) {      
+        const childrenIdx = this.lines[idx];
+        const dom = super.el.children[childrenIdx] as HTMLElement;
+        dom.style.backgroundColor = 'initial';
+      }
+    }
+    this.lastHighlightLine = lineNumber;
+  }
+
+  createdMarkerDom(lineNumber: number): HTMLSpanElement {
+    const markerDom: HTMLSpanElement = super.element('span');
+    markerDom.style.display = 'inline-block';
+    markerDom.style.width = `${this.markerWidth}px`;
+    markerDom.style.textAlign = 'right';
+    markerDom.style.color = '#333';
+    markerDom.style.backgroundColor = '#f0f0f0';
+    markerDom.style.padding = '0 13px';
+    markerDom.style.boxSizing = 'border-box';
+    markerDom.innerText = `${lineNumber + 1}`;
+    return markerDom;
+  }
+
   /**
    * 创建新的一行
    * @params line 在哪一行后插入
@@ -106,6 +145,8 @@ class TextLayer extends Dom {
     newLineDom.style.top = `${top}px`;
     newLineDom.style.position = 'absolute';
     newLineDom.style.height = `${this.lineHeight}px`;
+    newLineDom.style.width = '100%';
+    newLineDom.append(this.createdMarkerDom(lineNumber));
     if (content) {
       if (Array.isArray(content)) {
         content.forEach(i => { newLineDom.append(i); });
@@ -183,6 +224,7 @@ class TextLayer extends Dom {
         if (currentLine !== line) {
           currentLineDom.innerHTML = '';
           currentLine = line;
+          currentLineDom.append(this.createdMarkerDom(line));
         }
         const tag = Tag.getTagName(fragment);
         if (tag) {

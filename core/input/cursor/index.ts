@@ -35,6 +35,7 @@ class Cursor extends Dom {
     super.el.style.fontSize = `${Session.config.fontSize}px`;
     super.el.style.height = `${Render.textlayer.getLineHerght()}px`;
     super.el.className = 'cursor';
+    super.el.style.left = `${Render.textlayer.markerWidth}px`;
     this.isComp = false;
     this.timeInterval = 100; // 节流的毫秒
     this.charWidth = Session.config.fontSize * 0.5;
@@ -70,7 +71,7 @@ class Cursor extends Dom {
 
   onMouse(e: MouseEvent): void {
     // 点击鼠标左键或者点击事件，记录当前位置
-    this.location.x = e.x;
+    this.location.x = e.x - Render.textlayer.markerWidth;
     this.location.y = e.y;
     this.location.line = Math.max(Render.textlayer.getLineNumberAtVerticalOffset(e.y), 1);
     // 计算对应行的位置
@@ -78,7 +79,7 @@ class Cursor extends Dom {
     // 相对x的位置
     // 并进行计算，如果x大于最大列，则为最大列
     // 如果当前行为空行，则为0
-    let columnX = this.calcColumn(e.x);
+    let columnX = this.calcColumn(this.location.x);
     const textContent = Session.pieceTable.getLineRawContent(this.location.line);
     const maxColum = CursorColumns.getMaxColumn(textContent);
     let vColumn = 0, column = 0;
@@ -91,7 +92,8 @@ class Cursor extends Dom {
     }
     this.location.column = vColumn;;
     super.el.style.top = `${top}px`;
-    super.el.style.left = `${column * this.charWidth}px`;
+    super.el.style.left = `${column * this.charWidth + Render.textlayer.markerWidth}px`;
+    Render.textlayer.currentLineHighlight(this.location.line);
     setTimeout(() => {
       this.focus();
     });
@@ -123,7 +125,7 @@ class Cursor extends Dom {
     let column = CursorColumns.visibleColumnFromColumn(lineText, nextColumn);
     this.location.column = nextColumn;
     console.log('column --', column, offset, lineText);
-    super.el.style.left = `${column * this.charWidth}px`;
+    super.el.style.left = `${column * this.charWidth + Render.textlayer.markerWidth}px`;
   }
 
   moveEnd() {
@@ -137,7 +139,8 @@ class Cursor extends Dom {
     const top = Render.textlayer.getLineNumberAtLineNunber(this.location.line);
     let column = CursorColumns.visibleColumnFromColumn(lineText, this.location.column);
     super.el.style.top = `${top}px`;
-    super.el.style.left = `${column * this.charWidth}px`;
+    super.el.style.left = `${column * this.charWidth + Render.textlayer.markerWidth}px`;
+    Render.textlayer.currentLineHighlight(this.location.line);
   }
 
   moveVertical(offset: number) {
@@ -151,6 +154,7 @@ class Cursor extends Dom {
     this.moveHorizontal(0);
     const top = Render.textlayer.getLineNumberAtLineNunber(this.location.line);
     super.el.style.top = `${top}px`;
+    Render.textlayer.currentLineHighlight(this.location.line);
   }
 
   getLocation(): Location {

@@ -10,10 +10,10 @@ import cssRender from './cssRender';
 // 如果需要重新编译，可考虑做个逆向或者重新编译
 class Render {
 
-  content: HTMLElement; // 内容容器
-  scroller: HTMLElement; // 滚动容器
-  container: HTMLElement; // 容器
-  textlayer: TextLayer; // 文本容器
+  public content: HTMLElement; // 内容容器
+  public scroller: HTMLElement; // 滚动容器
+  public container: HTMLElement; // 容器
+  public textlayer: TextLayer; // 文本容器
 
   constructor() {
     // 初始化容器
